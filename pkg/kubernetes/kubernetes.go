@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/cosi-project/runtime/pkg/controller"
@@ -33,6 +34,7 @@ import (
 	"github.com/siderolabs/talos/pkg/machinery/config/machine"
 	"github.com/siderolabs/talos/pkg/machinery/constants"
 	"github.com/siderolabs/talos/pkg/machinery/resources/secrets"
+	"github.com/siderolabs/talos/pkg/machinery/version"
 )
 
 const (
@@ -51,6 +53,10 @@ func NewClientFromKubeletKubeconfig() (*Client, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", constants.KubeletKubeconfig)
 	if err != nil {
 		return nil, err
+	}
+
+	if config.UserAgent == "" {
+		config.UserAgent = fmt.Sprintf("%s/%s (%s/%s)", version.Name, version.Tag, runtime.GOOS, runtime.GOARCH)
 	}
 
 	// Set an explicit dial timeout so that requests to a stale/unreachable
